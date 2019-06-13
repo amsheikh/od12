@@ -1,0 +1,33 @@
+<odoo>
+  <data>
+      <record model="ir.ui.view" id="journal_form_view">
+          <field name="name">account.journal</field>
+          <field name="model">account.journal</field>
+          <field name="inherit_id" ref="account.view_account_journal_form"/>
+          <field name="arch" type="xml">
+              <sheet position="inside">
+                <group>
+                          <group position="inside">
+
+
+                            <field name="auto_creation"
+                              attrs="{
+                            'invisible': [('type', '!=', 'cash')]
+                            }"
+                            />
+
+
+                          </group>
+                          <group >
+
+
+                              </group>
+                      </group>
+
+              </sheet>
+
+          </field>
+      </record>
+  </data>
+
+</odoo>

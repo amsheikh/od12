@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="report_partnerledger_custom">
+    <t t-call="web.html_container">
+        <t t-set="data_report_margin_top" t-value="12"/>
+        <t t-set="data_report_header_spacing" t-value="9"/>
+        <t t-set="data_report_dpi" t-value="110"/>
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.internal_layout">
+                <div class="page">
+				<br/><br/><br/><br/><br/><br/>
+                    <h2>Statement</h2>
+
+                    <div class="row col">
+                        <div class="col-3">
+                            <strong>Company:</strong>
+                            <!--<p t-esc="res_company.name"/>-->
+                        </div>
+                        <div class="col-3">
+                            <t t-if="data['form']['date_from']"><strong>Date from :</strong> <span t-esc="data['form']['date_from']"/><br/></t>
+                            <t t-if="data['form']['date_to']"><strong>Date to :</strong> <span t-esc="data['form']['date_to']"/></t>
+                        </div>
+                        <div class="col-3">
+                            <strong>Target Moves:</strong>
+                            <p t-if="data['form']['target_move'] == 'all'">All Entries</p>
+                            <p t-if="data['form']['target_move'] == 'posted'">All Posted Entries</p>
+                        </div>
+                    </div>
+
+                    <table class="table table-condensed mt16">
+                        <thead>
+                            <tr style="background-color:#D6EAF8">
+                                <th>Date</th>
+                                <th>Acc</th>
+                                <th>JNL</th>
+                                <th>Ref</th>
+                                <th class="text-right">Debit</th>
+                                <th class="text-right">Credit</th>
+                                <th class="text-right">Balance</th>
+                                <th class="text-right" t-if="data['form']['amount_currency']">Currency</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-weight:bold;font-size:16px">
+                            <t t-set="balance_forward" t-value="sum_open_balance(data, o, 'debit - credit')"/>
+                            <t t-set="current_balance" t-value="sum_partner(data, o, 'debit - credit')"/>	
+							<t t-set="total_balance" t-value="balance_forward+current_balance"/>
+						
+                            <tr style="color:black;font-size:20px;color:blue;border-bottom:1px solid black">
+                                <td colspan="7">
+                                        <strong t-esc="o.ref"/>
+                                        - <strong t-esc="o.name"/>
+                                </td>
+
+                            </tr>
+							
+							
+                            <tr t-if="data['form']['date_from']" style="color:red;font-style:italic">
+                                <td colspan="4">
+                                        <strong>Balance Forward</strong>
+                                </td>
+                                <td class="text-right">
+                                    <strong t-esc="'%.2f'% sum_open_balance(data, o, 'debit')" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td class="text-right">
+                                    <strong t-esc="'%.2f'% sum_open_balance(data, o, 'credit')" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td class="text-right">
+                                    <strong t-esc="'%.2f'% balance_forward" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                            </tr>
+
+ 
+
+
+							<t t-set="printnew" t-value="1"/>
+							<t t-set="prevbal" t-value="balance_forward"/>
+							<t t-set="refe_odd" t-value="all"/>
+
+							<tr t-foreach="lines(data, o)" t-as="line">
+                                <t t-set="trdate" t-value="line['date']"/>	
+                                <t t-set="ref_memo" t-value="line['displayed_name']"/>
+                                <t t-set="groupline" t-value="line['move_name']"/>								
+								<t t-set="tdr" t-value="0"/>
+								<t t-set="tcred" t-value="0"/>
+								<t t-set="wcurr" t-value="0"/>
+								<t t-if="line_even">
+									<t t-set="refe_even" t-value="line['move_name']"/>
+								</t>
+								<t t-if="line_odd">
+									<t t-set="refe_odd" t-value="line['move_name']"/>
+								</t>
+								<t t-if="refe_odd==refe_even">
+									<t t-set="printnew" t-value="0"/>
+								</t>
+								<t t-if="not refe_odd==refe_even">
+									<t t-set="printnew" t-value="1"/>
+								</t>				
+								<t t-if="printnew==1">
+									<tr t-foreach="lines(data, o)" t-as="intline">
+										<t t-if="groupline==intline['move_name']">
+											<t t-set="tdr" t-value="tdr + intline['debit']"/>
+											<t t-set="tcred" t-value="tcred + intline['credit']"/>
+											<t t-set="wcurr" t-value="wcurr + intline['amount_currency']"/>
+										</t>							
+									</tr>
+									<t t-set="prevbal" t-value="tdr-tcred+prevbal"/>
+
+									<td class="text-nowrap">
+										<span t-esc="trdate"/>
+									</td>
+									<td>
+										<span t-esc="line['a_code']"/>
+                                    </td>
+									<td class="text-nowrap">
+										<span t-esc="groupline"/>
+									</td>
+									<td>
+										<span t-esc="ref_memo"/>
+									</td>
+									<td class="text-right">										
+										<span t-esc="'%.2f'% tdr" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+									</td>
+									<td class="text-right">
+										<span t-esc="'%.2f'% tcred" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+									</td>
+									<td class="text-right">
+										<span t-esc="'%.2f'% prevbal" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+									</td>
+                                    <td class="text-right text-nowrap" t-if="data['form']['amount_currency']" style="background-color:#F8F9F9">
+										<span t-esc="wcurr"/> <span t-esc="'%.2f'% line['currency_code']"/>
+                                    </td>
+								</t>
+							</tr>
+							
+                           <!--							
+                            <tr t-foreach="lines(data, o)" t-as="line">
+                                <td>
+                                    <span t-esc="line['date']"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line['code']"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line['a_code']"/>
+                                </td>
+                                <td>
+                                    <span t-esc="line['displayed_name']"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="line['debit']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="line['credit']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-esc="line['progress']" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td t-if="data['form']['amount_currency']">
+                                    <span t-esc="line['amount_currency']" /> <span t-esc="line['currency_code']" />
+                                </td>
+                            </tr>							
+							-->
+							
+							
+                            <tr style="color:#D5D8DC;font-style:italic;border-top:1px solid black">
+                                <td class="text-right" colspan="4">
+                                    <strong>Balance on Date</strong>
+                                </td>
+                                <td class="text-right">
+                                    <strong t-esc="'%.2f'% sum_partner(data, o, 'debit')" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td class="text-right">
+                                    <strong t-esc="'%.2f'% sum_partner(data, o, 'credit')" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                                <td class="text-right">
+                                    <strong t-esc="'%.2f'% current_balance" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                                </td>
+                            </tr>							
+							
+							
+                            <tr>
+                                <td class="text-right" colspan="4">
+                                        <strong>Total Amount Due</strong>
+                                </td>
+                                <td class="text-right">
+                                    </td>
+                                <td class="text-right">
+                                    </td>
+                                <td class="text-right">
+                                    <strong><span t-esc="'%.2f'% total_balance" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/></strong>
+                                    </td>
+                            </tr>
+
+							<div class="row col">
+							
+							</div>
+							
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+</odoo>

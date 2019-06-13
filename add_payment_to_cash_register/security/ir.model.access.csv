@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_add_payment_to_cash_register_add_payment_to_cash_register,add_payment_to_cash_register.add_payment_to_cash_register,model_add_payment_to_cash_register_add_payment_to_cash_register,,1,0,0,0
