@@ -1,0 +1,67 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="payment_form_view">
+            <field name="name">account.payment</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <sheet position="inside">
+                  <group>
+                            <group>
+
+
+                              <field name="registered" invisible="True" />
+
+
+                            </group>
+                            <group position="inside">
+                                  <field name="register"  />
+                                  <field name="cash_register_id" string="Cash Register"
+                                    attrs="{
+                                  'readonly': [('registered', '=', True)],'required':[('register','=', True)]}"/>
+                                </group>
+                        </group>
+
+                </sheet>
+
+            </field>
+        </record>
+    </data>
+    <data>
+        <record model="ir.ui.view" id="invoice_payment_form_view">
+            <field name="name">account.payment</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_invoice_form"/>
+            <field name="arch" type="xml">
+                <sheet position="inside">
+                  <group>
+                            <group>
+
+
+                              <field name="registered" invisible="True" />
+
+
+                            </group>
+                            <group position="inside">
+                              <field name="register"  />
+
+
+
+                                  <field name="cash_register_id" string="Cash Register"
+                                    attrs="{
+                                  'readonly': [('registered', '=', True)],'required':[('register','=', True)]}"/>
+
+
+
+
+
+
+                                </group>
+                        </group>
+
+                </sheet>
+
+            </field>
+        </record>
+    </data>
+</odoo>
